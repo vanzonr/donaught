@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 
    int  seconds   = (argc>1)?std::atoi(argv[1]):900;
    int  megabytes = (argc>2)?std::atoi(argv[2]):128;
+   bool crash     = (argc>3)?(std::string(argv[3])=="crash"):false;
 
    // Initialize mpi and figure out rank, size, and numthreads.
 
@@ -112,7 +113,11 @@ int main(int argc, char** argv)
 	   std::cout << "tick " << ++tick << std::endl;
        totelapsed = MPI_Wtime() - verystart;
    }
-   
+
+   // make it crash if requested   
+   if (crash) {
+       abort();
+   }
    MPI_Finalize();
    free(allocated);
 
