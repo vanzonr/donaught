@@ -135,17 +135,20 @@ for modset in "${modulesets[@]}" ; do
 
     mpicxx -std=c++11 -fopenmp -O0 -g donaught.cc -o donaught
     
-    echo "MPIRUN WITH $LOADEDMODULES"
-    mpirun ./donaught 13 >&/dev/null &
+    echo "MPIRUN crash WITH $LOADEDMODULES"
+    ulimit -c 0
+    mpirun --propagate=CORE ./donaught 13 crash >&/dev/null &
+    pid=$!
     sleep 9
     jobperf $SLURM_JOB_ID
-    wait
+    wait $pid
 
     echo "SRUN WITH $LOADEDMODULES"
     srun ./donaught 13  >&/dev/null &
+    pid=$!
     sleep 9
     jobperf $SLURM_JOB_ID
-    wait
+    wait $pid
 
     echo "------------------------------------------"
 
