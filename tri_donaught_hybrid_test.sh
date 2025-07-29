@@ -23,10 +23,14 @@ set -u
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 let NTASKS=SLURM_NTASKS
 
+export OMP_PLACES=cores
+export OMP_PROC_BIND=close
+
 echo "OMP_NUM_THREADS=$OMP_NUM_THREADS"
 echo "NTASKS=$NTASKS"
 
 modulesets=( 
+"gentoo/2023 intel/2023.2.1 intelmpi/2021.9.0" 
 "StdEnv/2023"
 "gentoo/2023 gcc/12.3 openmpi/4.1.5"
 "gentoo/2023 gcc/13.3 openmpi/5.0.3"
