@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/utsname.h>
 #include <unistd.h>
+#include <sys/sysinfo.h>
 
 #define _GNU_SOURCE
 #include <sched.h>
@@ -24,6 +25,33 @@ int pthread_getaffinity_np(pthread_t thread, size_t cpusetsize, cpu_set_t *cpuse
 #define BUFLEN 16384
 int intarraysize = 0;
 double gigabytes = 0.0;
+
+/*---------------------------------------------------------------------------*/
+
+int get_local_process_count(MPI_Comm comm) {
+    MPI_Comm local_comm;
+    int local_size;
+
+    // Create a communicator for processes that share the same node
+    MPI_Comm_split_type(comm, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &local_comm);
+
+    // Get the size of the local communicator = number of local processes
+    MPI_Comm_size(local_comm, &local_size);
+
+    // Clean up
+    MPI_Comm_free(&local_comm);
+
+    return local_size;
+}
+
+/*---------------------------------------------------------------------------*/
+
+long long get_node_memory_bytes() {
+    struct sysinfo info;
+    if (sysinfo(&info) == 0)
+        return (long long)info.totalram * info.mem_unit;
+    return 0;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -169,7 +197,27 @@ int main(int argc, char *argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     gigabytes = (argc>1)?atof(argv[1]):0;
     intarraysize = (gigabytes*1024*1024*1024)/(2*sizeof(int));
+    int numprocspernode=get_local_process_count(MPI_COMM_WORLD);
+    size_t memorypernode=get_node_memory_bytes();
+    int nthread;
+    #pragma omp parallel default(none) shared(nthread)
+    #pragma omp single
+    nthread = omp_get_num_threads();
+    double maxgigabytes = memorypernode/(double)(numprocspernode*nthread)/1073741824;
+    if (rank==0) {
+        printf("Number of processes: %d\n", nproc);
+        printf("Processes per node:  %d\n", numprocspernode);
+        printf("Threads per process: %d\n", nthread);
+        printf("Memory per node:    %.3lf GB\n",memorypernode/(double)1073741824);
+        printf("Max. GB per thread: %.3lf GB\n",maxgigabytes);
+    }
     
+    if (gigabytes > maxgigabytes) {
+        if (rank==0)
+            fprintf(stderr,"ERROR (bindreport): Asking too much memory per thread!\n");
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Abort(MPI_COMM_WORLD,2);
+    }
     if (rank==root) {
         
         reportonempiproc(rank, nproc, buf);
