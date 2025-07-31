@@ -1,6 +1,8 @@
 /* fake mpi implementation */
 #include "mpi.h"
 
+#include <stdlib.h>
+
 int MPI_Init_thread(int* argc, char***argv, int requested,int* provided)
 {
     *provided = requested;
@@ -33,3 +35,25 @@ int MPI_Finalize()
 {
     return 0;
 }
+
+int MPI_Comm_split_type(int comm, int how, int root, int info, int* local_comm)   
+{
+    *local_comm = comm;
+}
+
+int MPI_Comm_free(int* comm)
+{
+    return 0;
+}
+
+int MPI_Barrier(int comm)
+{
+    return 0;
+}
+
+int MPI_Abort(int comm, int errorcode)
+{
+    exit(errorcode);
+    return 0;
+}
+
