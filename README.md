@@ -16,11 +16,20 @@ Hybrid MPI/OpenMP C code that reports cpu bindings of processes and threads.
 
 Compile with
 
-"mpicc -fopenmp bindreport.c -o bindreport".
+ "mpicc -fopenmp bindreport.c -o bindreport".
+
 
 Run with
 
-"OMP_NUM_THREADS=[NTHREAD] mpirun -n [NPROC] [OPTIONS] ./bindreport [GBPERTHREAD]"
+ "OMP_NUM_THREADS=[NTHREAD] mpirun -n [NPROC] [OPTIONS] ./bindreport [GBPERTHREAD]"
 
 or replace mpirun with srun.
+
+For pure openmp cases, you can use the included fake mpi:
+
+ "gcc -fopenmp -I. bindreport.c mpi.c"
+
+and run with
+
+ "OMP_NUM_THREADS=[NTHREAD] ./bindreport [GBPERTHREAD]"
 
