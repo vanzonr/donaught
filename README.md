@@ -1,6 +1,6 @@
 # donaught
 
-Hybrid MPI/OpenMP C++ code that does nothing but eat ran and cycles and optionally crash .
+Hybrid MPI/OpenMP C++ code that does nothing but eat memory and cycles and optionally crash .
 
 Compile with
 
@@ -20,7 +20,7 @@ Compile with
 
 Run with
 
-"OMP_NUM_THREADs=[NTHREAD] mpirun -n [NPROC] [OPTIONS] ./bindreport [GBPERTHREAD]"
+"OMP_NUM_THREADS=[NTHREAD] mpirun -n [NPROC] [OPTIONS] ./bindreport [GBPERTHREAD]"
 
 or replace mpirun with srun.
 
